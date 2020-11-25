@@ -7,8 +7,8 @@
 
 int main(){
     int index, threshold_area;
-    Stack<Thombus<double>, allocator<Thombus<int>, 100> t;
-    
+    Stack<Rhombus<double>, allocator<Rhombus<double>, 100>> ;
+    std::co
 
     return 0;
 }
