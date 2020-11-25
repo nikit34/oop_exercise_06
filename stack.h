@@ -11,6 +11,7 @@ private:
 
 public:
     Stack() = default;
+    size_t size = 0;
 
     struct forward_iterator {
         using value_type = T;
@@ -59,7 +60,6 @@ private:
     };
 
     using unique_ptr = std::unique_ptr<Node, deleter>;
-    size_t size = 0;
     unique_ptr head {nullptr, deleter{&this->allocator}};
     allocator_type allocator {};
 
