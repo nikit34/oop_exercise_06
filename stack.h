@@ -24,7 +24,7 @@ public:
         T& operator* ();
 
         forward_iterator& operator++ ();
-        forward_iterator operator++ (int);
+        forward_iterator operator++(int);
 
         bool operator== (const forward_iterator& o) const;
         bool operator!= (const forward_iterator& o) const;
@@ -65,24 +65,21 @@ private:
 
     struct Node {
         Node() = default;
-        Node(const T& value): value(value), next_node(nullptr) {};
-        Node(const T& value, std::unique_ptr<Node> next): value(value), next_node(std::move(next)) {};
-
+        Node(const T& value, unique_ptr next): value(value), next_node(std::move(next)) {};
         forward_iterator next();
 
-    private:
         T value;
         unique_ptr next_node {nullptr, deleter{&this->allocator}};
     };
 };
 
 template<typename T, typename Allocator>
-Stack<T, Allocator>::forward_iterator Stack<T, Allocator>::Node::next() {
+typename Stack<T, Allocator>::forward_iterator Stack<T, Allocator>::Node::next() {
    return this->next_node.get();
 }
 
 template<typename T, typename Allocator>
-Stack<T, Allocator>::forward_iterator Stack<T, Allocator>::begin() {
+typename Stack<T, Allocator>::forward_iterator Stack<T, Allocator>::begin() {
    if (this->head == nullptr) {
        return nullptr;
    }
@@ -90,7 +87,7 @@ Stack<T, Allocator>::forward_iterator Stack<T, Allocator>::begin() {
 }
 
 template<typename T, typename Allocator>
-Stack<T, Allocator>::forward_iterator Stack<T, Allocator>::end() {
+typename Stack<T, Allocator>::forward_iterator Stack<T, Allocator>::end() {
    return nullptr;
 }
 
@@ -103,14 +100,14 @@ T& Stack<T, Allocator>::forward_iterator::operator* () {
 }
 
 template<typename T, typename Allocator>
-Stack<T, Allocator>::forward_iterator &Stack<T, Allocator>::forward_iterator::operator++ () {
+typename Stack<T, Allocator>::forward_iterator &Stack<T, Allocator>::forward_iterator::operator++ () {
     if(this->ptr != nullptr)
         *this = this->ptr->next();
    return *this;
 }
 
 template<typename T, typename Allocator>
-Stack<T, Allocator>::forward_iterator Stack<T, Allocator>::forward_iterator::operator++ (int) {
+typename Stack<T, Allocator>::forward_iterator Stack<T, Allocator>::forward_iterator::operator++ (int) {
     forward_iterator tmp = *this;
     ++(*this);
     return tmp;
@@ -150,13 +147,13 @@ void Stack<T, Allocator>::erase(const typename Stack<T, Allocator>::forward_iter
     if (it.ptr == nullptr) {
         throw std::logic_error("Erasing of iter is invalid");
     } else if (it == this->begin()) {
-        this->head = std::move(it.ptr->next);
+        this->head = std::move(it.ptr->next_node);
         --(this->size);
     } else {
         Stack<T, Allocator>::forward_iterator tmp_it = this->begin();
         while (tmp_it.ptr->next() != it.ptr)
             ++tmp_it;
-        tmp_it.ptr->next = std::move(it.ptr->next);
+        tmp_it.ptr->next_node = std::move(it.ptr->next_node);
     }
 }
 
@@ -165,10 +162,10 @@ void Stack<T, Allocator>::push(const T &value) {
     Node* new_ptr = this->allocator.allocate(1);
     std::allocator_traits<allocator_type>::construct(this->allocator, new_ptr, value, std::unique_ptr<Node, deleter>(nullptr, deleter{&this->allocator}));
 
-    unique_ptr new_node(new_ptr,, deleter{&this->allocator});
+    unique_ptr new_node(new_ptr, deleter{&this->allocator});
     new_node->next_node = std::move(this->head);
-   this->head = std::move(new_node);
-   ++(this->size);
+    this->head = std::move(new_node);
+    ++(this->size);
 }
 
 template<typename T, typename Allocator>

@@ -4,10 +4,31 @@
 
 
 template<typename T>
-double Rhombus<T>::get_diagonal(int& arr_index) {
-    T d1 = vertex::lenght(this->points[arr_index[0]], this->points[arr_index[1]]);
-    T d2 = vertex::lenght(this->points[arr_index[0]], this->points[arr_index[2]]);
-    T d3 = vertex::lenght(this->points[arr_index[0]], this->points[arr_index[3]]);
+struct Rhombus {
+    Rhombus() {};
+    Rhombus(const vertex_t<T>& p1, const vertex_t<T>& p2, const vertex_t<T>& p3, const vertex_t<T>& p4);
+
+    T area() const;
+    vertex_t<T> center() const;
+    void print(std::ostream& os) const;
+
+    void set_diagonal();
+    void set_points(std::pair<T, T> &p, size_t &index);
+
+    template<std::size_t N>
+    T get_diagonal(const size_t (&arr_index)[N]);
+
+    private:
+        std::array<vertex_t<T>, 4> points;
+        T small_diagonal, big_diagonal;
+};
+
+template<typename T>
+template<std::size_t N>
+T Rhombus<T>::get_diagonal(const size_t (&arr_index)[N]) {
+    T d1 = vertex::length(this->points[arr_index[0]], this->points[arr_index[1]]);
+    T d2 = vertex::length(this->points[arr_index[0]], this->points[arr_index[2]]);
+    T d3 = vertex::length(this->points[arr_index[0]], this->points[arr_index[3]]);
     if(d1 == d2) {
         return d3;
     } else if(d1 == d3) {
@@ -22,10 +43,10 @@ double Rhombus<T>::get_diagonal(int& arr_index) {
 template<typename T>
 void Rhombus<T>::set_diagonal(){
     try {
-        T d1 = get_diagonal({1, 2, 3, 4});
-        T d2 = get_diagonal({2, 1, 3, 4});
-        T d3 = get_diagonal({3, 1, 2, 4});
-        T d4 = get_diagonal({4, 1, 2, 3});
+        T d1 = get_diagonal({0, 1, 2, 3});
+        T d2 = get_diagonal({1, 0, 2, 3});
+        T d3 = get_diagonal({2, 0, 1, 3});
+        T d4 = get_diagonal({3, 0, 1, 2});
         if(d1 == d2 || d1 == d4) {
             if(d1 < d3) {
                 this->small_diagonal = d1;
@@ -50,24 +71,6 @@ void Rhombus<T>::set_diagonal(){
 }
 
 template<typename T>
-struct Rhombus {
-    Rhombus() {};
-    Rhombus(const vertex_t<T>& p1, const vertex_t<T>& p2, const vertex_t<T>& p3, const vertex_t<T>& p4);
-
-    double area() const;
-    vertex_t<T> center() const;
-    void print(std::ostream& os) const;
-
-    void set_diagonal();
-    double get_diagonal(int& arr_index);
-    std::istream& set_coord(std::istream& is);
-
-    private:
-        std::array<vertex_t<T>, 4> points;
-        T small_diagonal, big_diagonal;
-};
-
-template<typename T>
 Rhombus<T>::Rhombus(const vertex_t<T>& p1, const vertex_t<T>& p2, const vertex_t<T>& p3, const vertex_t<T>& p4) {
     this->points[0] = p1;
     this->points[1] = p2;
@@ -77,7 +80,7 @@ Rhombus<T>::Rhombus(const vertex_t<T>& p1, const vertex_t<T>& p2, const vertex_t
 }
 
 template<typename T>
-double Rhombus<T>::area() const {
+T Rhombus<T>::area() const {
     return this->small_diagonal * this->big_diagonal / 2.0;
 }
 
@@ -106,22 +109,24 @@ vertex_t<T> Rhombus<T>::center() const {
 template<typename T>
 void Rhombus<T>::print(std::ostream& os) const {
     os << "Rhombus: ";
-    for (const auto& p : this->points) {
+    for (const auto& p : this->points)
         os << p << ' ';
-    }
     os << std::endl;
 }
 
 template<typename T>
-std::istream &Rhombus<T>::set_coord(std::istream& is) {
-	for (int i = 0; i < 4; i++) {
-		is >> this->points[i];
-	}
-    this->set_diagonal();
-	return is;
+void Rhombus<T>::set_points(std::pair<T, T> &p, size_t &index){
+    this->points[index].x = p.first;
+    this->points[index].y = p.second;
 }
 
 template<typename T>
-std::istream &operator>> (std::istream &is, Rhombus<T> &t) {
-	return set_coord(is, t);
+std::istream &operator>> (std::istream &is, Rhombus<T> &item) {
+	std::pair<T, T> tmp_input;
+    for (size_t i = 0; i < 4; ++i) {
+		is >> tmp_input.first >> tmp_input.second;
+        item.set_points(tmp_input, i);
+    }
+    item.set_diagonal();
+	return is;
 }

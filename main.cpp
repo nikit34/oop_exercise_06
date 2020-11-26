@@ -18,14 +18,16 @@ void menu(){
 
 
 int main(){
-    int index, threshold_area, cmd;
-    Stack<Rhombus<double>, allocator<Rhombus<double>, 100>> st;
+    int index, threshold_area, cmd = 6;
+    Stack<Rhombus<double>, allocator<Rhombus<double>, 128>> st;
     double area;
-    while (std::cin >> cmd) {
+    do {
+		menu();
+		std::cin >> cmd;
 		switch(cmd) {
             case 1: {
                 Rhombus<double> rhom;
-			    std::cout << "Add item to top of stack - 1\n\t\tto iterator position - 2" << std::endl;
+			    std::cout << "Add item to top of stack - 1\n\t to iterator position - 2" << std::endl;
 			    std::cin >> cmd;
                 if(cmd == 1) {
 				    std::cout << "push --> Input points: ";
@@ -50,7 +52,7 @@ int main(){
 					std::cin >> index;
 					try {
                         auto it = st.begin();
-                        for (int i = 0; i < index; ++i)
+                        for (size_t i = 0; i < index; ++i)
                             ++it;
                         st.insert(it, rhom);
 					} catch (std::bad_alloc &e) {
@@ -67,7 +69,7 @@ int main(){
 				}
 			}
 			case 2: {
-				std::cout << "Delete item from top on stack - 1\n\t\tto iterator position - 2" << std::endl;
+				std::cout << "Delete item from top on stack - 1\n\t to iterator position - 2" << std::endl;
 				std::cin >> cmd;
 				if (cmd == 1) {
 					std::cout << "pop -->";
@@ -86,7 +88,7 @@ int main(){
                         if(index < 0 || index > st.size)
                             throw std::logic_error("\nOut of bounds\n");
                         auto it = st.begin();
-                        for(int i = 0; i < index; ++i)
+                        for(size_t i = 0; i < index; ++i)
                             ++it;
                         st.erase(it);
                     } catch(std::logic_error &e) {
@@ -139,6 +141,7 @@ int main(){
 			}
 			case 6: {
                 menu();
+				continue;
 			}
             case 0: {
                 return 0;
@@ -148,8 +151,7 @@ int main(){
 				std::cin.clear();
 				std::cin.ignore(30000, '\n');
 			}
-            menu();
 		}
-    }
+    } while(true);
     return 0;
 }
